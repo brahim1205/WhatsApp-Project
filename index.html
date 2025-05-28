@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body class="flex justify-center mt-8 bg-gray-50">
+    <div class="w-4/5 h-[650px] bg-stone-50 flex shadow-xl rounded-lg overflow-hidden">
+
+        <div class="w-24 h-full flex flex-col items-center py-4 space-y-6 justify-center bg-[#f0efe8]">
+            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200" id="messagesBtn">
+                <i class="fa-solid fa-message text-amber-black text-lg"></i>
+                <span class="text-xs text-amber-black mt-1">Messages</span>
+            </div>
+            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200" id="groupesBtn">
+                <i class="fa-solid fa-user-group text-amber-black text-lg"></i>
+                <span class="text-xs text-amber-black mt-1">Groupes</span>
+            </div>
+            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200">
+                <i class="fa-solid fa-arrows-turn-to-dots"></i>
+                <span class="text-xs text-amber-black mt-1">Diffusion</span>
+            </div>
+            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200" id="archiveBtn">
+                <i class="fa-solid fa-box-archive text-amber-black text-lg"></i>
+                <span class="text-xs text-amber-black mt-1">Archive</span>
+            </div>
+            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors mt-auto flex flex-col items-center border border-orange-200" id="toggleBtn">
+                <i class="fa-solid fa-plus text-amber-black text-lg"></i>
+                <span class="text-xs text-amber-black mt-1">Nouveau</span>
+            </div>
+        </div>
+
+        <div class="w-80 h-full border-r border-stone-200 bg-[#f9f7f5] flex flex-col">
+            <div class="p-4 border-b border-stone-200 flex-shrink-0">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">DISCUSSION</h2>
+                <input type="search" placeholder="Recherche" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="flex-1 overflow-y-auto">
+                <div class="p-3 space-y-4">
+
+                    <form id="myForm" class="hidden bg-white rounded shadow p-4 space-y-4">
+                        <div>
+                            <label for="name" class="block font-semibold">Nom</label>
+                            <input type="text" id="name" name="name" class="w-full border rounded px-2 py-1">
+                        </div>
+                        <div>
+                            <label for="tel" class="block font-semibold">Téléphone</label>
+                            <input type="text" id="tel" name="tel" class="w-full border rounded px-2 py-1">
+                        </div>
+                        <input type="submit" value="Enregistrer" class="bg-amber-300 hover:bg-amber-400 rounded px-4 py-2 cursor-pointer">
+                    </form>
+
+                    <div id="contactList" class="hidden">
+                        <ul id="contactUl" class="list-disc pl-5 space-y-2"></ul>
+                    </div>
+
+                    <div id="archiveContainer" class="hidden">
+                        <h3 class="font-bold text-lg mb-2">Contacts Archivés</h3>
+                        <div id="archiveList" class="space-y-2"></div>
+                        <div id="emptyArchive" class="text-gray-500 text-center py-4">Aucun contact archivé</div>
+                    </div>
+
+                    <div id="groupContainer" class="hidden">
+                        <h3 class="font-bold text-lg mb-2">Mes Groupes</h3>
+                        <ul id="groupList" class="space-y-2 mb-4"></ul>
+                        <button id="showCreateGroup" class="bg-amber-200 hover:bg-amber-300 text-black rounded px-3 py-2">Créer un groupe</button>
+
+                        <form id="createGroupForm" class="hidden mt-4 space-y-3 bg-white p-4 rounded shadow">
+                            <div>
+                                <label for="groupName" class="block font-semibold">Nom du groupe *</label>
+                                <input type="text" id="groupName" class="w-full border rounded px-2 py-1" >
+                            </div>
+                            <div>
+                                <label for="groupDescription" class="block font-semibold">Description</label>
+                                <textarea id="groupDescription" class="w-full border rounded px-2 py-1"></textarea>
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-1">Sélectionner au moins 3 membres :</p>
+                                <div id="contactCheckboxes" class="space-y-1"></div>
+                            </div>
+                            <button type="submit" class="bg-amber-200 hover:bg-amber-300 text-black rounded px-3 py-2">Créer</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+         <div class="flex-1 h-full bg-[#efe7d7] flex flex-col">
+            <header class="bg-white p-4 border-b flex items-center justify-between">
+            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-user text-gray-600"></i>
+            </div>
+
+            <div class="flex space-x-4">
+                <button title="Retour" class="text-orange-600 border border-orange-200">
+                <i class="fa-solid fa-delete-left"></i>
+                </button>
+                <button title="Archiver" class="text-gray-600 border border-gray-400">
+                <i class="fa-solid fa-box-archive"></i>
+                </button>
+                <button title="Maximiser" class="text-bla-600 border border-gray-700">
+                <i class="fa-solid fa-square"></i>
+                </button>
+                <button title="Supprimer" class="text-red-600 border border-red-600">
+                <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+            </header>
+
+
+
+            <section class="flex-1 p-4 overflow-y-auto text-gray-500 flex items-center justify-center">
+            </section>
+            <footer class="bg-white border-t p-4">
+                <div class="flex items-center space-x-2">
+                    <input type="text" placeholder="Saisissez un message..." class="flex-1 border rounded-xl px-4 py-2">
+                    <button class="bg-green-500 text-white p-3 rounded-full">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+<template id="contact-template">
+  <li class="flex items-center justify-between px-2 py-1 bg-white rounded shadow text-sm">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-gray-200 text-center leading-8 text-sm font-bold text-gray-700 profile-icon"></div>
+      <span class="contact-text"></span>
+    </div>
+    <div class="relative">
+      <button class="options-toggle">
+        <i class="fa-solid fa-angle-down text-gray-600 cursor-pointer"></i>
+      </button>
+      <div class="options-menu hidden absolute right-0 mt-1 bg-white border rounded shadow text-xs z-10">
+        <ul>
+          <li class="archive-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Archiver</li>
+          <li class="delete-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Supprimer</li>
+        </ul>
+      </div>
+    </div>
+  </li>
+</template>
+
+<template id="archive-template">
+  <div class="flex items-center justify-between px-2 py-1 bg-amber-50 rounded shadow text-sm border border-amber-200">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-amber-200 text-center leading-8 text-sm font-bold text-amber-700 profile-icon"></div>
+      <span class="contact-text"></span>
+    </div>
+    <div class="relative">
+      <button class="options-toggle">
+        <i class="fa-solid fa-angle-down text-gray-600 cursor-pointer"></i>
+      </button>
+      <div class="options-menu hidden absolute right-0 mt-1 bg-white border rounded shadow text-xs z-10">
+        <ul>
+          <li class="restore-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Restaurer</li>
+          <li class="delete-archive-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Supprimer définitivement</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script src="src/main.js"></script>
+</body>
+</html>
