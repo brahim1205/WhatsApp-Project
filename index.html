@@ -3,14 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>test2</title>
+    <title>Kaeniou-Waxtane - Application de Messagerie</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        .bg-amber-light { background-color: #f9f7f5; }
+        .bg-amber-medium { background-color: #f0efe8; }
+        .bg-chat-background { background-color: #efe7d7; }
+        .message-bubble-sent { background-color: #e1f3d8; border-radius: 0.5rem; }
+        .message-bubble-received { background-color: #ffffff; border-radius: 0.5rem; }
+        .hidden { display: none !important; }
+        .profile-icon { transition: all 0.3s ease; }
+        .profile-icon:hover { transform: scale(1.1); }
+        .status-online {
+            color: #10b981;
+            display: flex;
+            align-items: center;
+        }
+        .status-online i {
+            margin-right: 4px;
+            font-size: 8px;
+        }
+        .status-offline {
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+        }
+        .status-offline i {
+            margin-right: 4px;
+            font-size: 8px;
+        }
+        .draft-indicator {
+            color: #ef4444;
+            font-style: italic;
+        }
+        .recording {
+            background-color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .audio-wave {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .audio-bar {
+            width: 3px;
+            background-color: #10b981;
+            border-radius: 2px;
+            animation: wave 1s infinite ease-in-out;
+        }
+        .audio-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+        .audio-bar:nth-child(2) { height: 15px; animation-delay: 0.1s; }
+        .audio-bar:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+        .audio-bar:nth-child(4) { height: 15px; animation-delay: 0.3s; }
+        .audio-bar:nth-child(5) { height: 10px; animation-delay: 0.4s; }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.5); }
+        }
+        .call-animation {
+            animation: callPulse 2s infinite;
+        }
+        @keyframes callPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .call-connecting {
+            animation: connecting 1s infinite;
+        }
+        @keyframes connecting {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    </style>
 </head>
 <body class="flex justify-center mt-8 bg-gray-50">
-    <div class="w-4/5 h-[650px] bg-stone-50 flex shadow-xl rounded-lg overflow-hidden">
+    <!-- Écran d'authentification -->
+    <div id="authScreen" class="w-full max-w-md mx-4 bg-white rounded-lg shadow-xl p-6">
+        <div class="text-center mb-6">
+            <i class="fa-brands fa-whatsapp text-6xl text-purple-600 mb-4"></i>
+            <h1 class="text-2xl font-bold text-gray-800">Kaeniou-Waxtane</h1>
+            <p class="text-gray-600">Connectez-vous pour commencer</p>
+        </div>
+        
+        <form id="authForm" class="space-y-4">
+            <div>
+                <label for="userName" class="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
+                <input type="text" id="userName"  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Votre nom">
+            </div>
+            
+            <div>
+                <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Numéro de téléphone</label>
+                <div class="flex">
+                    <select id="countrySelect" class="px-3 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-800">
+                        <option value="+221">🇸🇳 +221</option>
+                        <option value="+33">🇫🇷 +33</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                    </select>
+                    <input type="tel" id="phoneNumber"  class="flex-1 px-3 py-2 border-t border-r border-b border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Votre numéro">
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-purple-700 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                Se connecter
+            </button>
+        </form>
+    </div>
 
-        <div class="w-24 h-full flex flex-col items-center py-4 space-y-6 justify-center bg-[#f0efe8]">
+    <!-- Application principale -->
+    <div id="mainApp" class="hidden w-4/5 h-[650px] bg-stone-50 flex shadow-xl rounded-lg overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <div class="w-24 h-full flex flex-col items-center py-4 space-y-6 justify-center bg-amber-medium">
             <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200" id="messagesBtn">
                 <i class="fa-solid fa-message text-amber-black text-lg"></i>
                 <span class="text-xs text-amber-black mt-1">Messages</span>
@@ -19,7 +130,7 @@
                 <i class="fa-solid fa-user-group text-amber-black text-lg"></i>
                 <span class="text-xs text-amber-black mt-1">Groupes</span>
             </div>
-            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200">
+            <div class="p-3 hover:bg-amber-200 rounded-lg cursor-pointer transition-colors flex flex-col items-center border border-orange-200" id="diffusionBtn">
                 <i class="fa-solid fa-arrows-turn-to-dots"></i>
                 <span class="text-xs text-amber-black mt-1">Diffusion</span>
             </div>
@@ -33,140 +144,520 @@
             </div>
         </div>
 
-        <div class="w-80 h-full border-r border-stone-200 bg-[#f9f7f5] flex flex-col">
+        <!-- Contacts Panel -->
+        <div class="w-80 h-full border-r border-stone-200 bg-amber-light flex flex-col">
             <div class="p-4 border-b border-stone-200 flex-shrink-0">
-                <h2 class="text-lg font-semibold text-gray-700 mb-3">DISCUSSION</h2>
-                <input type="search" placeholder="Recherche" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 id="sectionTitle" class="text-lg font-semibold text-gray-700">DISCUSSION</h2>
+                    <div class="flex items-center cursor-pointer hover:opacity-80 transition-opacity" id="userInfo">
+                        <div id="profileIcon" class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mr-2 profile-icon"></div>
+                        <span id="usernameDisplay" class="font-medium"></span>
+                        <div id="userStatus" class="ml-2 text-xs">
+                            <div class="status-online">
+                                <i class="fa-solid fa-circle"></i>
+                                <span>en ligne</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="search" id="searchInput" placeholder="Recherche (tapez * pour ordre alphabétique)" class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
             </div>
 
             <div class="flex-1 overflow-y-auto">
-                <div class="p-3 space-y-4">
-
-                    <form id="myForm" class="hidden bg-white rounded shadow p-4 space-y-4">
+                <div class="p-3 space-y-4 h-full flex flex-col">
+                    <!-- Nouveau Contact Form -->
+                    <form id="newContactForm" class="hidden bg-white rounded shadow p-4 space-y-4">
                         <div>
-                            <label for="name" class="block font-semibold">Nom</label>
-                            <input type="text" id="name" name="name" class="w-full border rounded px-2 py-1">
+                            <label for="contactName" class="block font-semibold">Nom</label>
+                            <input type="text" id="contactName" class="w-full border rounded px-2 py-1">
                         </div>
                         <div>
-                            <label for="tel" class="block font-semibold">Téléphone</label>
-                            <input type="text" id="tel" name="tel" class="w-full border rounded px-2 py-1">
+                            <label for="contactTel" class="block font-semibold">Téléphone</label>
+                            <input type="text" id="contactTel" class="w-full border rounded px-2 py-1">
                         </div>
-                        <input type="submit" value="Enregistrer" class="bg-amber-300 hover:bg-amber-400 rounded px-4 py-2 cursor-pointer">
+                        <button type="submit" class="bg-amber-300 hover:bg-amber-400 rounded px-4 py-2 cursor-pointer text-black">Enregistrer</button>
                     </form>
 
-                    <div id="contactList" class="hidden">
-                        <ul id="contactUl" class="list-disc pl-5 space-y-2"></ul>
+                    <!-- Contact List -->
+                    <div id="contactList" class="hidden flex-1">
+                        <ul id="contactUl" class="list-none space-y-2"></ul>
                     </div>
 
-                    <div id="archiveContainer" class="hidden">
+                    <!-- Archive Container -->
+                    <div id="archiveContainer" class="hidden flex-1">
                         <h3 class="font-bold text-lg mb-2">Contacts Archivés</h3>
                         <div id="archiveList" class="space-y-2"></div>
                         <div id="emptyArchive" class="text-gray-500 text-center py-4">Aucun contact archivé</div>
                     </div>
 
-                    <div id="groupContainer" class="hidden">
+                    <!-- Group Container -->
+                    <div id="groupContainer" class="hidden flex-1 flex flex-col">
                         <h3 class="font-bold text-lg mb-2">Mes Groupes</h3>
-                        <ul id="groupList" class="space-y-2 mb-4"></ul>
-                        <button id="showCreateGroup" class="bg-amber-200 hover:bg-amber-300 text-black rounded px-3 py-2">Créer un groupe</button>
+                        <ul id="groupList" class="space-y-2 flex-1 mb-4"></ul>
+                        
+                        <div class="mt-auto pt-4 border-t border-gray-200">
+                            <button id="showCreateGroup" class="w-full bg-amber-200 hover:bg-amber-300 text-black rounded-full px-3 py-3 flex items-center justify-center space-x-2 transition-colors">
+                                <i class="fa-solid fa-plus text-lg"></i>
+                                <span class="font-medium">Créer un groupe</span>
+                            </button>
+                        </div>
 
                         <form id="createGroupForm" class="hidden mt-4 space-y-3 bg-white p-4 rounded shadow">
                             <div>
                                 <label for="groupName" class="block font-semibold">Nom du groupe *</label>
-                                <input type="text" id="groupName" class="w-full border rounded px-2 py-1" >
+                                <input type="text" id="groupName" class="w-full border rounded px-2 py-1">
                             </div>
                             <div>
                                 <label for="groupDescription" class="block font-semibold">Description</label>
                                 <textarea id="groupDescription" class="w-full border rounded px-2 py-1"></textarea>
                             </div>
                             <div>
-                                <p class="font-semibold mb-1">Sélectionner au moins 3 membres :</p>
-                                <div id="contactCheckboxes" class="space-y-1"></div>
+                                <p class="font-semibold mb-1">Sélectionner au moins 2 membres :</p>
+                                <div id="contactCheckboxes" class="space-y-1 max-h-32 overflow-y-auto"></div>
+                                <p id="selectedCount" class="text-xs text-gray-500 mt-1">0 membre(s) sélectionné(s)</p>
                             </div>
-                            <button type="submit" class="bg-amber-200 hover:bg-amber-300 text-black rounded px-3 py-2">Créer</button>
+                            <div class="flex space-x-2">
+                                <button type="submit" class="bg-amber-200 hover:bg-amber-300 text-black rounded px-3 py-2">Créer</button>
+                                <button type="button" id="cancelGroupForm" class="border border-gray-300 rounded px-3 py-2">Annuler</button>
+                            </div>
                         </form>
                     </div>
 
+                    <!-- Diffusion Container -->
+                    <div id="diffusionContainer" class="hidden flex-1 flex flex-col">
+                        <h3 class="font-bold text-lg mb-2">Mes Diffusions</h3>
+                        <ul id="diffusionList" class="space-y-2 flex-1 mb-4"></ul>
+                        
+                        <div class="mt-auto pt-4 border-t border-gray-200">
+                            <button id="showCreateDiffusion" class="w-full bg-amber-200 hover:bg-amber-300 text-black rounded-full px-3 py-3 flex items-center justify-center space-x-2 transition-colors">
+                                <i class="fa-solid fa-plus text-lg"></i>
+                                <span class="font-medium">Créer une diffusion</span>
+                            </button>
+                        </div>
+
+                        <form id="createDiffusionForm" class="hidden mt-4 space-y-3 bg-white p-4 rounded shadow">
+                            <div>
+                                <label for="diffusionName" class="block font-semibold">Nom de la diffusion *</label>
+                                <input type="text" id="diffusionName" class="w-full border rounded px-2 py-1">
+                            </div>
+                            <div>
+                                <p class="font-semibold mb-1">Sélectionner les destinataires :</p>
+                                <div id="diffusionContactCheckboxes" class="space-y-1 max-h-32 overflow-y-auto"></div>
+                                <p id="diffusionSelectedCount" class="text-xs text-gray-500 mt-1">0 destinataire(s) sélectionné(s)</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button type="submit" class="bg-amber-200 hover:bg-amber-300 text-black rounded px-3 py-2">Créer</button>
+                                <button type="button" id="cancelDiffusionForm" class="border border-gray-300 rounded px-3 py-2">Annuler</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Multi-Contact Message Form -->
+                    <div id="multiContactForm" class="hidden bg-white rounded shadow p-4 space-y-4">
+                        <h3 class="font-semibold">Envoyer à plusieurs contacts</h3>
+                        <div>
+                            <p class="font-semibold mb-1">Sélectionner les destinataires :</p>
+                            <div id="multiContactCheckboxes" class="space-y-1 max-h-32 overflow-y-auto"></div>
+                            <p id="multiSelectedCount" class="text-xs text-gray-500 mt-1">0 destinataire(s) sélectionné(s)</p>
+                        </div>
+                        <div>
+                            <label for="multiMessage" class="block font-semibold">Message</label>
+                            <textarea id="multiMessage" class="w-full border rounded px-2 py-1" rows="3" placeholder="Votre message..."></textarea>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="button" id="sendMultiMessage" class="bg-green-500 hover:bg-green-600 text-white rounded px-4 py-2">Envoyer</button>
+                            <button type="button" id="cancelMultiMessage" class="border border-gray-300 rounded px-3 py-2">Annuler</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-         <div class="flex-1 h-full bg-[#efe7d7] flex flex-col">
-            <header class="bg-white p-4 border-b flex items-center justify-between">
-            <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                <i class="fa-solid fa-user text-gray-600"></i>
-            </div>
-
-            <div class="flex space-x-4">
-                <button title="Retour" class="text-orange-600 border border-orange-200">
-                <i class="fa-solid fa-delete-left"></i>
-                </button>
-                <button title="Archiver" class="text-gray-600 border border-gray-400">
-                <i class="fa-solid fa-box-archive"></i>
-                </button>
-                <button title="Maximiser" class="text-bla-600 border border-gray-700">
-                <i class="fa-solid fa-square"></i>
-                </button>
-                <button title="Supprimer" class="text-red-600 border border-red-600">
-                <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-            </header>
-
-
-
-            <section class="flex-1 p-4 overflow-y-auto text-gray-500 flex items-center justify-center">
-            </section>
-            <footer class="bg-white border-t p-4">
-                <div class="flex items-center space-x-2">
-                    <input type="text" placeholder="Saisissez un message..." class="flex-1 border rounded-xl px-4 py-2">
-                    <button class="bg-green-500 text-white p-3 rounded-full">
-                        <i class="fa-solid fa-arrow-right"></i>
+        <!-- Main Chat Area -->
+        <div class="flex-1 h-full bg-chat-background flex flex-col" id="mainChatArea">
+            <!-- Chat Header -->
+            <header id="chatHeader" class="hidden bg-white p-4 border-b flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div id="chatContactIcon" class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-user text-gray-600"></i>
+                    </div>
+                    <div>
+                        <div id="chatContactName" class="font-semibold text-gray-800"></div>
+                        <div id="chatContactStatus" class="text-sm text-gray-500"></div>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button id="voiceCallBtn" >
+                    </button>
+                    <button id="videoCallBtn" ">
+                    </button>
+                    <button id="backBtn" title="Retour" class="text-orange-600 border border-orange-200 p-2 rounded">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button id="archiveChatBtn" title="Archiver" class="text-gray-600 border border-gray-400 p-2 rounded">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </button>
+                    <button title="Enregistrer" class="text-black border border-black p-2 rounded">
+                        <i class="fa-solid fa-square"></i>
+                    </button>
+                    <button id="deleteBtn" title="Supprimer" class="text-red-600 border border-red-600 p-2 rounded">
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
+            </header>
+
+            <!-- Messages Area -->
+            <section id="chatMessages" class="hidden flex-1 p-4 overflow-y-auto">
+                <div id="messagesList" class="space-y-2"></div>
+            </section>
+
+            <!-- Default Welcome Section -->
+            <section class="flex-1 p-4 overflow-y-auto text-gray-500 flex items-center justify-center" id="defaultMessage">
+                <div class="text-center">
+                    <i class="fa-solid fa-comments text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-xl">Sélectionnez une conversation pour commencer</p>
+                </div>
+            </section>
+
+            <!-- Chat Input -->
+            <footer id="chatInput" class="hidden bg-white border-t p-4">
+                <div id="draftIndicator" class="hidden text-xs text-red-500 mb-2">
+                    <i class="fa-solid fa-edit"></i> Brouillon sauvegardé
+                </div>
+                <div id="recordingIndicator" class="hidden text-xs text-red-500 mb-2 flex items-center">
+                    <div class="audio-wave mr-2">
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                        <div class="audio-bar"></div>
+                    </div>
+                    <span>Enregistrement en cours... <span id="recordingTime">0:00</span></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="imageBtn" class="text-gray-600 p-2 hover:bg-gray-100 rounded">
+                        <i class="fa-solid fa-image"></i>
+                    </button>
+                    <button id="fileBtn" class="text-gray-600 p-2 hover:bg-gray-100 rounded">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <button id="audioBtn" class="text-gray-600 p-2 hover:bg-gray-100 rounded">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <input type="text" id="messageInput" placeholder="Saisissez un message..." class="flex-1 border rounded-xl px-4 py-2">
+                    <button id="sendBtn" class="bg-green-500 text-white p-3 rounded-full">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" class="hidden">
+                <input type="file" id="fileInputHidden" class="hidden">
+                <input type="file" id="audioInput" accept="audio/*" class="hidden">
             </footer>
         </div>
     </div>
 
-<template id="contact-template">
-  <li class="flex items-center justify-between px-2 py-1 bg-white rounded shadow text-sm">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-gray-200 text-center leading-8 text-sm font-bold text-gray-700 profile-icon"></div>
-      <span class="contact-text"></span>
+    <!-- Modal d'appel vocal -->
+    <div id="callModal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <div class="bg-gray-900 text-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div class="mb-6">
+                <div id="callContactIcon" class="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4 call-animation">
+                    <i class="fa-solid fa-user text-4xl"></i>
+                </div>
+                <h3 id="callContactName" class="text-xl font-semibold mb-2">Contact</h3>
+                <p id="callStatus" class="text-gray-400 call-connecting">Appel en cours...</p>
+                <p id="callDuration" class="text-green-400 hidden">00:00</p>
+            </div>
+            
+            <div class="flex justify-center space-x-6">
+                <button id="muteCallBtn" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-full">
+                    <i class="fa-solid fa-microphone text-xl"></i>
+                </button>
+                <button id="speakerBtn" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-full">
+                    <i class="fa-solid fa-volume-up text-xl"></i>
+                </button>
+                <button id="endCallBtn" class="bg-red-600 hover:bg-red-700 p-4 rounded-full">
+                    <i class="fa-solid fa-phone-slash text-xl"></i>
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="relative">
-      <button class="options-toggle">
-        <i class="fa-solid fa-angle-down text-gray-600 cursor-pointer"></i>
-      </button>
-      <div class="options-menu hidden absolute right-0 mt-1 bg-white border rounded shadow text-xs z-10">
-        <ul>
-          <li class="archive-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Archiver</li>
-          <li class="delete-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Supprimer</li>
-        </ul>
-      </div>
-    </div>
-  </li>
-</template>
 
-<template id="archive-template">
-  <div class="flex items-center justify-between px-2 py-1 bg-amber-50 rounded shadow text-sm border border-amber-200">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-amber-200 text-center leading-8 text-sm font-bold text-amber-700 profile-icon"></div>
-      <span class="contact-text"></span>
+    <!-- Modal d'appel vidéo -->
+    <div id="videoCallModal" class="hidden fixed inset-0 bg-black flex items-center justify-center z-50">
+        <div class="w-full h-full relative">
+            <!-- Vidéo principale -->
+            <div class="w-full h-full bg-gray-900 flex items-center justify-center">
+                <div class="text-center text-white">
+                    <div id="videoCallContactIcon" class="w-32 h-32 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-4 call-animation">
+                        <i class="fa-solid fa-user text-6xl"></i>
+                    </div>
+                    <h3 id="videoCallContactName" class="text-2xl font-semibold mb-2">Contact</h3>
+                    <p id="videoCallStatus" class="text-gray-400 call-connecting">Appel vidéo en cours...</p>
+                    <p id="videoCallDuration" class="text-green-400 hidden">00:00</p>
+                </div>
+            </div>
+            
+            <!-- Vidéo locale (petite fenêtre) -->
+            <div class="absolute top-4 right-4 w-32 h-24 bg-gray-800 rounded-lg border-2 border-white">
+                <div class="w-full h-full bg-gray-700 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-user text-white text-2xl"></i>
+                </div>
+            </div>
+            
+            <!-- Contrôles -->
+            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-6">
+                <button id="muteVideoCallBtn" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-full text-white">
+                    <i class="fa-solid fa-microphone text-xl"></i>
+                </button>
+                <button id="cameraBtn" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-full text-white">
+                    <i class="fa-solid fa-video text-xl"></i>
+                </button>
+                <button id="endVideoCallBtn" class="bg-red-600 hover:bg-red-700 p-4 rounded-full text-white">
+                    <i class="fa-solid fa-phone-slash text-xl"></i>
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="relative">
-      <button class="options-toggle">
-        <i class="fa-solid fa-angle-down text-gray-600 cursor-pointer"></i>
-      </button>
-      <div class="options-menu hidden absolute right-0 mt-1 bg-white border rounded shadow text-xs z-10">
-        <ul>
-          <li class="restore-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Restaurer</li>
-          <li class="delete-archive-btn px-3 py-1 hover:bg-gray-100 cursor-pointer">Supprimer définitivement</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</template>
 
-<script src="src/main.js"></script>
+    <!-- Modal de paramètres utilisateur -->
+    <div id="userSettingsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 text-white rounded-lg w-full max-w-md mx-4 h-[600px] overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold">Paramètres</h3>
+                    <button id="closeUserSettings" class="text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Barre de recherche -->
+                <div class="relative mb-6">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Rechercher dans les paramètres" class="w-full bg-gray-700 text-white pl-10 pr-4 py-2 rounded-lg">
+                </div>
+                
+                <!-- Profil utilisateur -->
+                <div class="flex items-center mb-6 p-3 hover:bg-gray-700 rounded-lg cursor-pointer" id="editProfile">
+                    <div id="settingsProfileIcon" class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-4"></div>
+                    <div>
+                        <div id="settingsUserName" class="font-medium"></div>
+                        <div id="settingsUserDescription" class="text-sm text-gray-400">Salut ! J'utilise Kaeniou-Waxtane.</div>
+                    </div>
+                </div>
+                
+                <!-- Options de paramètres -->
+                <div class="space-y-1">
+                    <div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center">
+                        <i class="fa-solid fa-link w-6 text-gray-400 mr-4"></i>
+                        <div>
+                            <div class="font-medium">Compte</div>
+                            <div class="text-sm text-gray-400">Notifications de sécurité, informations de compte</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center">
+                        <i class="fa-solid fa-lock w-6 text-gray-400 mr-4"></i>
+                        <div>
+                            <div class="font-medium">Confidentialité</div>
+                            <div class="text-sm text-gray-400">Contacts bloqués, messages éphémères</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center">
+                        <i class="fa-solid fa-comments w-6 text-gray-400 mr-4"></i>
+                        <div>
+                            <div class="font-medium">Discussions</div>
+                            <div class="text-sm text-gray-400">Thème, fond d'écran, paramètres des discussions</div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center">
+                        <i class="fa-solid fa-bell w-6 text-gray-400 mr-4"></i>
+                        <div>
+                            <div class="font-medium">Notifications</div>
+                            <div class="text-sm text-gray-400">Notifications de messages</div>
+                        </div>
+                    </div>
+                    
+              
+                    
+                    <!-- Déconnexion déplacée ici -->
+                <div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket w-6 text-red-400 mr-4"></i>
+                <div>
+                    <div class="font-medium text-red-400">Se déconnecter</div>
+                    <div class="text-sm text-gray-400">Quitter l'application</div>
+                </div>
+            </div>
+                    
+                    <div class="p-3 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center">
+                        <i class="fa-solid fa-question-circle w-6 text-gray-400 mr-4"></i>
+                        <div>
+                            <div class="font-medium">Aide</div>
+                            <div class="text-sm text-gray-400">Pages d'aide, contactez-nous, politique de confidentialité</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal d'édition de profil -->
+    <div id="editProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Modifier le profil</h3>
+                <button id="closeEditProfile" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <form id="editProfileForm" class="space-y-4">
+                <div>
+                    <label for="editUserName" class="block font-semibold mb-1">Nom</label>
+                    <input type="text" id="editUserName" class="w-full border rounded px-3 py-2">
+                </div>
+                <div>
+                    <label for="editUserDescription" class="block font-semibold mb-1">Description</label>
+                    <textarea id="editUserDescription" class="w-full border rounded px-3 py-2" rows="3" placeholder="Ajoutez une description..."></textarea>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Sauvegarder</button>
+                    <button type="button" id="cancelEditProfile" class="border border-gray-300 px-4 py-2 rounded">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de gestion des groupes -->
+    <div id="groupManageModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Gérer le groupe</h3>
+                <button id="closeGroupModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Informations du groupe -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mr-3">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h4 id="groupManageName" class="font-semibold"></h4>
+                        <p id="groupManageDescription" class="text-sm text-gray-600"></p>
+                        <p id="groupMemberCount" class="text-sm text-blue-600 font-medium"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ajouter des membres -->
+            <div class="mb-6">
+                <h4 class="font-semibold mb-2">Ajouter des membres</h4>
+                <div id="availableContacts" class="space-y-2 max-h-32 overflow-y-auto"></div>
+            </div>
+            
+            <!-- Membres actuels -->
+            <div>
+                <h4 class="font-semibold mb-2">Membres du groupe</h4>
+                <div id="groupMembersList" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup personnalisé -->
+    <div id="customPopup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 text-center">
+            <div class="mb-4">
+                <i id="popupIcon" class="text-4xl mb-2"></i>
+                <h3 id="popupTitle" class="text-lg font-semibold mb-2"></h3>
+                <p id="popupMessage" class="text-gray-600"></p>
+            </div>
+            <div class="flex justify-center space-x-3">
+                <button id="popupCancel" class="hidden px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">Annuler</button>
+                <button id="popupConfirm" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">OK</button>
+            </div>
+        </div>
+    </div>
+
+=   <script src="src/main.js"></script>
+
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
 </body>
 </html>
