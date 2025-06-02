@@ -1,4 +1,3 @@
-// Variables globales
         let currentUser = null;
         let contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
         let groups = JSON.parse(localStorage.getItem('groups') || '[]');
@@ -23,7 +22,6 @@
         let callInterval = null;
         
 
-        // Système de popup personnalisé
         function showPopup(title, message, type = 'info', showCancel = false) {
             return new Promise((resolve) => {
                 const popup = document.getElementById('customPopup');
@@ -33,7 +31,6 @@
                 const popupConfirm = document.getElementById('popupConfirm');
                 const popupCancel = document.getElementById('popupCancel');
 
-                // Définir l'icône selon le type
                 const icons = {
                     'info': 'fa-solid fa-info-circle text-blue-500',
                     'warning': 'fa-solid fa-exclamation-triangle text-yellow-500',
@@ -64,7 +61,6 @@
             });
         }
 
-        // Initialiser les contacts avec des statuts aléatoires
         function initializeContactsStatus() {
             contacts.forEach(contact => {
                 if (contact.isOnline === undefined) {
@@ -75,17 +71,14 @@
             saveToStorage();
         }
 
-        // Simuler les changements de statut
         function simulateStatusChanges() {
             setInterval(() => {
                 contacts.forEach(contact => {
-                    // 10% de chance de changer de statut toutes les 30 secondes
                     if (Math.random() < 0.1) {
                         contact.isOnline = !contact.isOnline;
                         contact.lastSeen = new Date();
                         saveToStorage();
                         
-                        // Mettre à jour l'affichage si nécessaire
                         if (currentSection === 'contacts') {
                             renderContacts();
                         }
@@ -94,10 +87,9 @@
                         }
                     }
                 });
-            }, 30000); // Toutes les 30 secondes
+            }, 30000); 
         }
 
-        // Gestion des appels
         function startVoiceCall() {
             if (!selectedContact) return;
             
@@ -110,7 +102,6 @@
             
             showCallModal();
             
-            // Simuler la connexion
             setTimeout(() => {
                 if (currentCall) {
                     currentCall.status = 'connected';
@@ -135,7 +126,6 @@
             
             showVideoCallModal();
             
-            // Simuler la connexion
             setTimeout(() => {
                 if (currentCall) {
                     currentCall.status = 'connected';
@@ -176,7 +166,6 @@
             if (currentCall) {
                 const duration = currentCall.startTime ? Math.floor((Date.now() - currentCall.startTime) / 1000) : 0;
                 
-                // Ajouter un message d'appel dans la conversation
                 if (duration > 0) {
                     addCallMessage(currentCall.type, duration);
                 }
@@ -236,7 +225,6 @@
             saveToStorage();
             loadMessages();
             
-            // Mettre à jour les listes
             if (currentSection === 'contacts') renderContacts();
         }
 
@@ -291,7 +279,6 @@
             }
         }
 
-        // Utilitaires
         function saveToStorage() {
             localStorage.setItem('contacts', JSON.stringify(contacts));
             localStorage.setItem('groups', JSON.stringify(groups));
@@ -352,7 +339,6 @@
             }
         }
 
-        // Authentification
         document.getElementById('authForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -384,7 +370,6 @@
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
             
-            // Afficher les infos utilisateur
             const profileIcon = document.getElementById('profileIcon');
             const usernameDisplay = document.getElementById('usernameDisplay');
             
@@ -392,16 +377,13 @@
             profileIcon.style.backgroundColor = getProfileColor(currentUser.nom);
             usernameDisplay.textContent = currentUser.nom;
             
-            // Initialiser les statuts des contacts
             initializeContactsStatus();
             
-            // Démarrer la simulation des changements de statut
             simulateStatusChanges();
             
             showSection('contacts');
         }
 
-        // Navigation
         function showSection(section) {
             currentSection = section;
             
@@ -469,7 +451,6 @@
             });
         }
 
-        // Gestion des contacts
         function renderContacts() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             let filteredContacts = contacts;
@@ -488,7 +469,7 @@
             if (alphabeticalSort && !searchTerm) {
                 filteredContacts.sort((a, b) => a.name.localeCompare(b.name));
             } else if (!searchTerm) {
-                // Trier par derniers messages
+
                 filteredContacts.sort((a, b) => {
                     const lastMessageA = getLastMessage(a.id);
                     const lastMessageB = getLastMessage(b.id);
@@ -567,14 +548,14 @@
         }
 
         function toggleContactMenu(contactId) {
-            // Fermer tous les autres menus
+
             document.querySelectorAll('.options-menu').forEach(menu => {
                 if (menu.id !== `menu-${contactId}`) {
                     menu.classList.add('hidden');
                 }
             });
             
-            // Toggle le menu actuel
+
             const menu = document.getElementById(`menu-${contactId}`);
             menu.classList.toggle('hidden');
         }
@@ -713,7 +694,6 @@
                 saveToStorage();
                 renderArchive();
                 
-                // Fermer le menu
                 const menu = document.getElementById(`archive-menu-${contactId}`);
                 if (menu) menu.classList.add('hidden');
             }
@@ -736,14 +716,12 @@
                     saveToStorage();
                     renderArchive();
                     
-                    // Fermer le menu
                     const menu = document.getElementById(`archive-menu-${contactId}`);
                     if (menu) menu.classList.add('hidden');
                 }
             }
         }
 
-        // Gestion des groupes
         function renderGroups() {
             const groupList = document.getElementById('groupList');
             groupList.innerHTML = '';
@@ -826,12 +804,10 @@
             const group = groups.find(g => g.id === groupId);
             if (!group) return;
             
-            // Remplir les informations du groupe
             document.getElementById('groupManageName').textContent = group.nom;
             document.getElementById('groupManageDescription').textContent = group.description || 'Aucune description';
             document.getElementById('groupMemberCount').textContent = `${group.membres.length} membres`;
             
-            // Afficher les contacts disponibles pour ajouter
             const availableContacts = document.getElementById('availableContacts');
             availableContacts.innerHTML = '';
             
@@ -894,10 +870,9 @@
                 group.membres.push(memberName);
                 groups = groups.map(g => g.id === groupId ? group : g);
                 saveToStorage();
-                manageGroup(groupId); // Rafraîchir la modal
-                renderGroups(); // Rafraîchir la liste
+                manageGroup(groupId); 
+                renderGroups(); 
                 
-                // Mettre à jour le chat si ce groupe est sélectionné
                 if (selectedGroup && selectedGroup.id === groupId) {
                     selectedGroup = group;
                     updateChatStatus();
@@ -959,7 +934,6 @@
             }
         }
 
-        // Gestion des diffusions
         function renderDiffusions() {
             const diffusionList = document.getElementById('diffusionList');
             diffusionList.innerHTML = '';
@@ -1037,7 +1011,6 @@
             }
         }
 
-        // Gestion des messages multi-contacts
         function showMultiContactForm() {
             document.getElementById('multiContactForm').classList.remove('hidden');
             
@@ -1070,7 +1043,6 @@
                 return;
             }
             
-            // Créer une nouvelle diffusion automatiquement
             const newDiffusion = {
                 id: Date.now().toString(),
                 nom: `Diffusion ${new Date().toLocaleDateString('fr-FR')}`,
@@ -1098,27 +1070,23 @@
             conversations[targetId].push(message);
             saveToStorage();
             
-            // Réinitialiser le formulaire
             document.getElementById('multiMessage').value = '';
             document.querySelectorAll('#multiContactCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateMultiSelectedCount();
             document.getElementById('multiContactForm').classList.add('hidden');
             
-            // Aller à la section diffusion et sélectionner la nouvelle diffusion
             showSection('diffusion');
             setTimeout(() => {
                 selectDiffusion(newDiffusion);
             }, 100);
         }
 
-        // Chat
         function showChat() {
             document.getElementById('defaultMessage').classList.add('hidden');
             document.getElementById('chatHeader').classList.remove('hidden');
             document.getElementById('chatMessages').classList.remove('hidden');
             document.getElementById('chatInput').classList.remove('hidden');
             
-            // Mettre à jour l'en-tête du chat
             const chatContactIcon = document.getElementById('chatContactIcon');
             const chatContactName = document.getElementById('chatContactName');
             const chatContactStatus = document.getElementById('chatContactStatus');
@@ -1132,7 +1100,6 @@
                 chatContactName.textContent = selectedContact.name;
                 updateChatStatus();
                 
-                // Afficher les boutons d'appel pour les contacts individuels
                 voiceCallBtn.classList.remove('hidden');
                 videoCallBtn.classList.remove('hidden');
             } else if (selectedGroup) {
@@ -1142,7 +1109,6 @@
                 chatContactName.textContent = selectedGroup.nom;
                 chatContactStatus.textContent = `${selectedGroup.membres.length} membres`;
                 
-                // Cacher les boutons d'appel pour les groupes
                 voiceCallBtn.classList.add('hidden');
                 videoCallBtn.classList.add('hidden');
             } else if (selectedDiffusion) {
@@ -1152,15 +1118,12 @@
                 chatContactName.textContent = selectedDiffusion.nom;
                 chatContactStatus.textContent = `${selectedDiffusion.recipients.length} destinataires`;
                 
-                // Cacher les boutons d'appel pour les diffusions
                 voiceCallBtn.classList.add('hidden');
                 videoCallBtn.classList.add('hidden');
             }
             
-            // Charger les messages
             loadMessages();
             
-            // Charger le brouillon
             const targetId = selectedContact?.id || `groupe_${selectedGroup?.id}` || `diffusion_${selectedDiffusion?.id}`;
             if (drafts[targetId]) {
                 document.getElementById('messageInput').value = drafts[targetId];
@@ -1240,7 +1203,6 @@
                 messagesList.appendChild(div);
             });
             
-            // Scroll vers le bas
             messagesList.scrollTop = messagesList.scrollHeight;
         }
 
@@ -1268,7 +1230,6 @@
             
             conversations[targetId].push(message);
             
-            // Effacer le brouillon
             delete drafts[targetId];
             document.getElementById('draftIndicator').classList.add('hidden');
             
@@ -1276,12 +1237,10 @@
             messageInput.value = '';
             loadMessages();
             
-            // Mettre à jour les listes
             if (currentSection === 'contacts') renderContacts();
             if (currentSection === 'groupes') renderGroups();
             if (currentSection === 'diffusion') renderDiffusions();
             
-            // Simuler les statuts de message
             setTimeout(() => {
                 const messageIndex = conversations[targetId].findIndex(m => m.id === message.id);
                 if (messageIndex !== -1) {
@@ -1291,7 +1250,6 @@
                 }
             }, 1000);
             
-            // Simuler la lecture si le contact est en ligne
             if (selectedContact?.isOnline) {
                 setTimeout(() => {
                     const messageIndex = conversations[targetId].findIndex(m => m.id === message.id);
@@ -1303,7 +1261,6 @@
                 }, 2000);
             }
             
-            // Simuler une réponse
             setTimeout(() => simulateResponse(targetId), Math.random() * 3000 + 1000);
         }
 
@@ -1343,7 +1300,6 @@
                 loadMessages();
             }
             
-            // Mettre à jour les listes
             if (currentSection === 'contacts') renderContacts();
             if (currentSection === 'groupes') renderGroups();
             if (currentSection === 'diffusion') renderDiffusions();
@@ -1363,14 +1319,12 @@
                 }
                 saveToStorage();
                 
-                // Mettre à jour les listes pour afficher les brouillons
                 if (currentSection === 'contacts') renderContacts();
                 if (currentSection === 'groupes') renderGroups();
                 if (currentSection === 'diffusion') renderDiffusions();
             }
         }
 
-        // Gestion de l'enregistrement audio
         function startRecording() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 showPopup('Erreur', 'L\'enregistrement audio n\'est pas supporté par votre navigateur', 'error');
@@ -1390,10 +1344,8 @@
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                         const audioUrl = URL.createObjectURL(audioBlob);
                         
-                        // Envoyer le message audio
                         sendAudioMessage(audioUrl);
                         
-                        // Arrêter le stream
                         stream.getTracks().forEach(track => track.stop());
                     };
 
@@ -1401,11 +1353,9 @@
                     isRecording = true;
                     recordingStartTime = Date.now();
                     
-                    // Afficher l'indicateur d'enregistrement
                     document.getElementById('recordingIndicator').classList.remove('hidden');
                     document.getElementById('audioBtn').classList.add('recording');
                     
-                    // Démarrer le timer
                     recordingInterval = setInterval(updateRecordingTime, 1000);
                 })
                 .catch(error => {
@@ -1419,11 +1369,9 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 
-                // Cacher l'indicateur d'enregistrement
                 document.getElementById('recordingIndicator').classList.add('hidden');
                 document.getElementById('audioBtn').classList.remove('recording');
                 
-                // Arrêter le timer
                 if (recordingInterval) {
                     clearInterval(recordingInterval);
                     recordingInterval = null;
@@ -1464,13 +1412,11 @@
             saveToStorage();
             loadMessages();
             
-            // Mettre à jour les listes
             if (currentSection === 'contacts') renderContacts();
             if (currentSection === 'groupes') renderGroups();
             if (currentSection === 'diffusion') renderDiffusions();
         }
 
-        // Gestion des paramètres utilisateur
         function showUserSettings() {
             document.getElementById('settingsProfileIcon').textContent = getUserInitials(currentUser.nom);
             document.getElementById('settingsProfileIcon').style.backgroundColor = getProfileColor(currentUser.nom);
@@ -1515,23 +1461,20 @@
             reader.readAsDataURL(file);
         }
 
-        // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Vérifier si l'utilisateur est déjà connecté
+
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 showMainApp();
             }
             
-            // Navigation
             document.getElementById('messagesBtn').onclick = () => showSection('contacts');
             document.getElementById('groupesBtn').onclick = () => showSection('groupes');
             document.getElementById('diffusionBtn').onclick = () => showSection('diffusion');
             document.getElementById('archiveBtn').onclick = () => showSection('archive');
             document.getElementById('toggleBtn').onclick = () => showSection('nouveau');
             
-            // Paramètres utilisateur
             document.getElementById('userInfo').onclick = showUserSettings;
             document.getElementById('closeUserSettings').onclick = () => {
                 document.getElementById('userSettingsModal').classList.add('hidden');
@@ -1545,7 +1488,6 @@
                 location.reload();
             };
             
-            // Édition de profil
             document.getElementById('editProfileForm').onsubmit = function(e) {
                 e.preventDefault();
                 
@@ -1558,7 +1500,6 @@
                     
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
-                    // Mettre à jour l'interface
                     document.getElementById('profileIcon').textContent = getUserInitials(currentUser.nom);
                     document.getElementById('profileIcon').style.backgroundColor = getProfileColor(currentUser.nom);
                     document.getElementById('usernameDisplay').textContent = currentUser.nom;
@@ -1567,14 +1508,12 @@
                 }
             };
             
-            // Recherche
             document.getElementById('searchInput').oninput = () => {
                 if (currentSection === 'contacts') {
                     renderContacts();
                 }
             };
             
-            // Nouveau contact
             document.getElementById('newContactForm').onsubmit = async function(e) {
                 e.preventDefault();
 
@@ -1586,20 +1525,17 @@
                     return;
                 }
 
-                // Vérifier si le numéro existe déjà
                 const telExists = contacts.some(c => c.tel === tel);
                 if (telExists) {
                     await showPopup('Erreur', 'Ce numéro existe déjà dans vos contacts.', 'error');
                     return;
                 }
 
-                // Trouver tous les contacts qui commencent par le même nom (ex: Ali, Ali2, Ali3)
                 const regex = new RegExp(`^${name}(\\d+)?$`);
                 const sameNameContacts = contacts.filter(c => regex.test(c.name));
 
                 let contactName = name;
                 if (sameNameContacts.length > 0) {
-                    // Chercher le plus grand numéro déjà utilisé
                     let maxNumber = 1;
                     sameNameContacts.forEach(contact => {
                         const match = contact.name.match(new RegExp(`^${name}(\\d+)?$`));
@@ -1630,7 +1566,6 @@
             };
 
             
-            // Création de groupe
             document.getElementById('showCreateGroup').onclick = async () => {
                 if (contacts.length < 2) {
                     await showPopup('Erreur', 'Vous devez avoir au moins 2 contacts pour créer un groupe', 'error');
@@ -1640,7 +1575,6 @@
                 document.getElementById('showCreateGroup').classList.add('hidden');
                 document.getElementById('createGroupForm').classList.remove('hidden');
                 
-                // Remplir les checkboxes
                 const checkboxes = document.getElementById('contactCheckboxes');
                 checkboxes.innerHTML = '';
                 
@@ -1702,7 +1636,6 @@
                 renderGroups();
             };
             
-            // Création de diffusion
             document.getElementById('showCreateDiffusion').onclick = async () => {
                 if (contacts.length === 0) {
                     await showPopup('Erreur', 'Vous devez avoir au moins 1 contact pour créer une diffusion', 'error');
@@ -1712,7 +1645,6 @@
                 document.getElementById('showCreateDiffusion').classList.add('hidden');
                 document.getElementById('createDiffusionForm').classList.remove('hidden');
                 
-                // Remplir les checkboxes
                 const checkboxes = document.getElementById('diffusionContactCheckboxes');
                 checkboxes.innerHTML = '';
                 
@@ -1769,13 +1701,11 @@
                 renderDiffusions();
             };
             
-            // Messages multi-contacts
             document.getElementById('sendMultiMessage').onclick = sendMultiMessage;
             document.getElementById('cancelMultiMessage').onclick = () => {
                 document.getElementById('multiContactForm').classList.add('hidden');
             };
             
-            // Chat
             document.getElementById('backBtn').onclick = hideChat;
             document.getElementById('sendBtn').onclick = sendMessage;
             document.getElementById('messageInput').onkeypress = function(e) {
@@ -1785,7 +1715,6 @@
                 }
             };
             
-            // Appels
             document.getElementById('voiceCallBtn').onclick = startVoiceCall;
             document.getElementById('videoCallBtn').onclick = startVideoCall;
             document.getElementById('endCallBtn').onclick = endCall;
@@ -1795,14 +1724,11 @@
             document.getElementById('cameraBtn').onclick = toggleCamera;
             document.getElementById('speakerBtn').onclick = toggleSpeaker;
             
-            // Sauvegarder les brouillons
             document.getElementById('messageInput').oninput = saveDraft;
             
-            // Gestion des fichiers
             document.getElementById('imageBtn').onclick = () => document.getElementById('imageInput').click();
             document.getElementById('fileBtn').onclick = () => document.getElementById('fileInputHidden').click();
             
-            // Gestion de l'audio
             document.getElementById('audioBtn').onmousedown = startRecording;
             document.getElementById('audioBtn').onmouseup = stopRecording;
             document.getElementById('audioBtn').onmouseleave = stopRecording;
@@ -1822,12 +1748,10 @@
                 if (file) handleFileUpload(file, 'audio');
             };
             
-            // Modal de gestion des groupes
             document.getElementById('closeGroupModal').onclick = () => {
                 document.getElementById('groupManageModal').classList.add('hidden');
             };
             
-            // Actions du chat
             document.getElementById('archiveChatBtn').onclick = () => {
                 if (selectedContact) {
                     archiveContact(selectedContact.id);
@@ -1848,7 +1772,6 @@
                 }
             };
             
-            // Fermer les menus en cliquant ailleurs
             document.onclick = function(e) {
                 if (!e.target.closest('.options-toggle') && !e.target.closest('.options-menu')) {
                     document.querySelectorAll('.options-menu').forEach(menu => {
